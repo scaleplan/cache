@@ -1,0 +1,12 @@
+{
+    "name": "scaleplan/cache",
+    "description": "Cache implementation",
+    "autoload": {
+        "psr-4": {
+            "Scaleplan\\Cache\\": "src/"
+        }
+    },
+    "require": {
+        "php": ">=7.2"
+    }
+}
