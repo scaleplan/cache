@@ -179,7 +179,7 @@ class RedisCache implements CacheInterface
      */
     public function delete(string $key) : void
     {
-        if (!$this->getCacheConnect()->unlink($this->getKey($key))) {
+        if (!$this->getCacheConnect()->del($this->getKey($key))) {
             throw new RedisOperationException('Операция удаления по ключу не удалась.');
         }
     }
