@@ -1,10 +1,11 @@
 <?php
+declare(strict_types=1);
 
 namespace Scaleplan\Cache;
 
-use Scaleplan\Cache\Structures\CacheStructure;
 use Scaleplan\Cache\Exceptions\RedisCacheException;
 use Scaleplan\Cache\Exceptions\RedisOperationException;
+use Scaleplan\Cache\Structures\CacheStructure;
 use Scaleplan\Cache\Structures\TagStructure;
 
 /**
@@ -14,7 +15,7 @@ use Scaleplan\Cache\Structures\TagStructure;
  */
 class RedisCache implements CacheInterface
 {
-    public const RESERVED = null;
+    public const RESERVED       = '';
     public const RETRY_INTERVAL = 0;
 
     /**
@@ -55,8 +56,8 @@ class RedisCache implements CacheInterface
         }
 
         $hostOrSocket = getenv(self::CACHE_HOST_OR_SOCKET_ENV);
-        $port = getenv(self::CACHE_PORT_ENV);
-        $timeout = getenv(self::CACHE_TIMEOUT_ENV) ?: 0;
+        $port = (int)getenv(self::CACHE_PORT_ENV);
+        $timeout = (int)getenv(self::CACHE_TIMEOUT_ENV) ?: 0;
         if (!$hostOrSocket || !$hostOrSocket) {
             throw new RedisCacheException('Недостаточно даных для подключения к Redis.');
         }
@@ -89,7 +90,7 @@ class RedisCache implements CacheInterface
      */
     protected function getKey(string $key) : string
     {
-        return $key . $this->databaseKeyPostfix;
+        return "$key:{$this->databaseKeyPostfix}";
     }
 
     /**
@@ -101,7 +102,7 @@ class RedisCache implements CacheInterface
      */
     public function get(string $key) : CacheStructure
     {
-        return new CacheStructure((array)json_decode($this->getCacheConnect()->get($this->getKey($key)), true));
+        return new CacheStructure((array)json_decode($this->getCacheConnect()->get($this->getKey($key)) ?: '', true));
     }
 
     /**
@@ -144,7 +145,7 @@ class RedisCache implements CacheInterface
             return $this->getKey($value);
         }, $tags);
         foreach ($this->getCacheConnect()->mget($databaseKeys) ?: [] as $key => $value) {
-            $value = \json_decode($value, true);
+            $value = \json_decode($value ?: '', true);
             if (!$value) {
                 continue;
             }

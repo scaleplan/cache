@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Scaleplan\Cache;
 
@@ -50,7 +51,7 @@ class MemcachedCache implements CacheInterface
         }
 
         $hostOrSocket = getenv(self::CACHE_HOST_OR_SOCKET_ENV);
-        $port = getenv(self::CACHE_PORT_ENV);
+        $port = (int)getenv(self::CACHE_PORT_ENV);
         if (!$hostOrSocket || !$hostOrSocket) {
             throw new MemcachedCacheException('Недостаточно даных для подключения к Memcached.');
         }

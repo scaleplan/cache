@@ -1,9 +1,12 @@
 <?php
+declare(strict_types=1);
 
 namespace Scaleplan\Cache\Structures;
 
 use Scaleplan\Cache\Exceptions\CacheException;
 use Scaleplan\InitTrait\InitTrait;
+use Scaleplan\Result\DbResult;
+use Scaleplan\Result\Interfaces\DbResultInterface;
 
 /**
  * Class CacheStructure
@@ -157,9 +160,18 @@ class CacheStructure
      */
     public function __toString()
     {
+        $data = (string)$this->data;
+        if ($this->data instanceof DbResultInterface) {
+            $data = $this->data->getResult();
+        }
+
+        if (is_array($this->data)) {
+            $data = $this->data;
+        }
+
         $json = json_encode([
             'tags'   => $this->getTags(),
-            'data'   => $this->getData(),
+            'data'   => $data,
             'time'   => $this->getTime(),
             'max_id' => $this->getMaxId(),
             'min_id' => $this->getMinId(),
