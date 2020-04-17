@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace Scaleplan\Cache;
 
-use Scaleplan\Cache\Structures\CacheStructure;
 use Scaleplan\Cache\Exceptions\MemcachedCacheException;
 use Scaleplan\Cache\Exceptions\MemcachedOperationException;
+use Scaleplan\Cache\Structures\CacheStructure;
 use Scaleplan\Cache\Structures\TagStructure;
 
 /**
@@ -47,7 +47,7 @@ class MemcachedCache implements CacheInterface
     public function getCacheConnect() : \Memcached
     {
         if ($this->memcached->getServerList()) {
-            $this->memcached;
+            return $this->memcached;
         }
 
         $hostOrSocket = getenv(self::CACHE_HOST_OR_SOCKET_ENV);
@@ -78,23 +78,19 @@ class MemcachedCache implements CacheInterface
      */
     protected function getKey(string $key) : string
     {
-        return $key . $this->databaseKeyPostfix;
+        return "$key:{$this->databaseKeyPostfix}";
     }
 
     /**
      * @param string $key
-     * @param CacheStructure $value
-     * @param int $ttl
+     *
+     * @return CacheStructure
      *
      * @throws MemcachedCacheException
-     * @throws MemcachedOperationException
      */
-    public function set(string $key, CacheStructure $value, int $ttl = null) : void
+    public function get(string $key) : CacheStructure
     {
-        $ttl = $ttl ?? ((int)getenv(self::CACHE_TIMEOUT_ENV) ?: 0);
-        if (!$this->getCacheConnect()->set($this->getKey($key), (string)$value, $ttl)) {
-            throw new MemcachedOperationException('Операция записи по ключу не удалась.');
-        }
+        return new CacheStructure((array)json_decode($this->getCacheConnect()->get($this->getKey($key)) ?: '', true));
     }
 
     /**
@@ -105,13 +101,21 @@ class MemcachedCache implements CacheInterface
      */
     public function initTags(array $tags) : void
     {
-        /** @var TagStructure $value */
-        foreach ($tags as &$value) {
-            if (!$this->getCacheConnect()->set($this->getKey($value->getName()), (string)$value)) {
+        if (!$tags) {
+            return;
+        }
+
+        $tagsToSave = [];
+        /** @var TagStructure $tagStructure */
+        foreach ($tags as $tagStructure) {
+            if (!$tagStructure instanceof TagStructure) {
+                continue;
+            }
+
+            if (!$this->getCacheConnect()->set($this->getKey($tagStructure->getName()), (string)$tagStructure)) {
                 throw new MemcachedOperationException('Операция инициализации тегов не удалась.');
             }
         }
-        unset($value);
     }
 
     /**
@@ -139,14 +143,24 @@ class MemcachedCache implements CacheInterface
 
     /**
      * @param string $key
-     *
-     * @return CacheStructure
+     * @param CacheStructure $value
+     * @param int $ttl
      *
      * @throws MemcachedCacheException
+     * @throws MemcachedOperationException
      */
-    public function get(string $key) : CacheStructure
+    public function set(string $key, CacheStructure $value, int $ttl = null) : void
     {
-        return new CacheStructure((array)json_decode($this->getCacheConnect()->get($this->getKey($key)), true));
+        if ($value instanceof \Serializable) {
+            $strValue = $value->serialize();
+        } else {
+            $strValue = (string)$value;
+        }
+
+        $ttl = $ttl ?? ((int)getenv(self::CACHE_TIMEOUT_ENV) ?: 0);
+        if (!$this->getCacheConnect()->set($this->getKey($key), $strValue, $ttl)) {
+            throw new MemcachedOperationException('Операция записи по ключу не удалась.');
+        }
     }
 
     /**

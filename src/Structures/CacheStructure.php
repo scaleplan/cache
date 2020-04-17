@@ -6,6 +6,7 @@ namespace Scaleplan\Cache\Structures;
 use Scaleplan\Cache\Exceptions\CacheException;
 use Scaleplan\InitTrait\InitTrait;
 use Scaleplan\Result\DbResult;
+use Scaleplan\Result\Interfaces\ArrayResultInterface;
 use Scaleplan\Result\Interfaces\DbResultInterface;
 
 /**
@@ -161,7 +162,7 @@ class CacheStructure
     public function __toString()
     {
         $data = (string)$this->data;
-        if ($this->data instanceof DbResultInterface) {
+        if ($this->data instanceof ArrayResultInterface) {
             $data = $this->data->getResult();
         }
 

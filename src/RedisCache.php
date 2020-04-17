@@ -166,8 +166,14 @@ class RedisCache implements CacheInterface
      */
     public function set(string $key, CacheStructure $value, int $ttl = null) : void
     {
+        if ($value instanceof \Serializable) {
+            $strValue = $value->serialize();
+        } else {
+            $strValue = (string)$value;
+        }
+
         $ttl = $ttl ?? (int)$this->redis->getTimeout();
-        if (!$this->getCacheConnect()->set($this->getKey($key), (string)$value, $ttl)) {
+        if (!$this->getCacheConnect()->set($this->getKey($key), $strValue, $ttl)) {
             throw new RedisOperationException('Операция записи по ключу не удалась.');
         }
     }
