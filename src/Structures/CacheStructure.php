@@ -5,9 +5,7 @@ namespace Scaleplan\Cache\Structures;
 
 use Scaleplan\Cache\Exceptions\CacheException;
 use Scaleplan\InitTrait\InitTrait;
-use Scaleplan\Result\DbResult;
 use Scaleplan\Result\Interfaces\ArrayResultInterface;
-use Scaleplan\Result\Interfaces\DbResultInterface;
 
 /**
  * Class CacheStructure

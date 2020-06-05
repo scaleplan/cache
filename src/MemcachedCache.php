@@ -105,7 +105,6 @@ class MemcachedCache implements CacheInterface
             return;
         }
 
-        $tagsToSave = [];
         /** @var TagStructure $tagStructure */
         foreach ($tags as $tagStructure) {
             if (!$tagStructure instanceof TagStructure) {
