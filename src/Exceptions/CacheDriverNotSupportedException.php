@@ -9,6 +9,6 @@ namespace Scaleplan\Cache\Exceptions;
  */
 class CacheDriverNotSupportedException extends CacheException
 {
-    public const MESSAGE = 'Cache driver not supporting.';
+    public const MESSAGE = 'Такой драйвер кэша не поддерживается.';
     public const CODE = 406;
 }

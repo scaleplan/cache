@@ -9,5 +9,5 @@ namespace Scaleplan\Cache\Exceptions;
  */
 class MemcachedCacheException extends CacheException
 {
-    public const MESSAGE = 'Memcached cache error.';
+    public const MESSAGE = 'Ошибка Memcached.';
 }

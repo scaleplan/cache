@@ -9,5 +9,5 @@ namespace Scaleplan\Cache\Exceptions;
  */
 class RedisCacheException extends CacheException
 {
-    public const MESSAGE = 'Redis cache error.';
+    public const MESSAGE = 'Ошибка Redis.';
 }

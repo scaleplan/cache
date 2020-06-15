@@ -59,7 +59,7 @@ class RedisCache implements CacheInterface
         $port = (int)getenv(self::CACHE_PORT_ENV);
         $timeout = (int)getenv(self::CACHE_TIMEOUT_ENV) ?: 0;
         if (!$hostOrSocket || !$hostOrSocket) {
-            throw new RedisCacheException('Недостаточно даных для подключения к Redis.');
+            throw new RedisCacheException('Недостаточно данных для подключения к Redis.');
         }
 
         if ($this->isPconnect) {
@@ -72,7 +72,7 @@ class RedisCache implements CacheInterface
             return $this->redis;
         }
 
-        throw new RedisCacheException ("Не удалось подключиться к хосту/сокету $hostOrSocket");
+        throw new RedisCacheException ("Не удалось подключиться к хосту/сокету $hostOrSocket.");
     }
 
     /**

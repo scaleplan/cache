@@ -53,14 +53,14 @@ class MemcachedCache implements CacheInterface
         $hostOrSocket = getenv(self::CACHE_HOST_OR_SOCKET_ENV);
         $port = (int)getenv(self::CACHE_PORT_ENV);
         if (!$hostOrSocket || !$hostOrSocket) {
-            throw new MemcachedCacheException('Недостаточно даных для подключения к Memcached.');
+            throw new MemcachedCacheException('Недостаточно данных для подключения к Memcached.');
         }
 
         if ($this->memcached->addServer($hostOrSocket, $port)) {
             return $this->memcached;
         }
 
-        throw new MemcachedCacheException('Не удалось подключиться к Memcached');
+        throw new MemcachedCacheException('Не удалось подключиться к Memcached.');
     }
 
     /**

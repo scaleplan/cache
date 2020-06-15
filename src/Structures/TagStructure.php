@@ -130,7 +130,7 @@ class TagStructure
     {
         $json = json_encode($this->toArray(), JSON_UNESCAPED_UNICODE);
         if ($json === false) {
-            throw new CacheException('Не удалось сериализовать данные для кэширования');
+            throw new CacheException('Не удалось сериализовать данные для кэширования.');
         }
 
         return (string)$json;

@@ -9,7 +9,7 @@ namespace Scaleplan\Cache\Exceptions;
  */
 class CacheException extends \Exception
 {
-    public const MESSAGE = 'Cache error.';
+    public const MESSAGE = 'Ошибка кэша.';
     public const CODE = 400;
 
     /**
