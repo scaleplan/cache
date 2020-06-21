@@ -7,6 +7,7 @@ use Scaleplan\Cache\Exceptions\MemcachedCacheException;
 use Scaleplan\Cache\Exceptions\MemcachedOperationException;
 use Scaleplan\Cache\Structures\CacheStructure;
 use Scaleplan\Cache\Structures\TagStructure;
+use function Scaleplan\Translator\translate;
 
 /**
  * Class MemcachedCache
@@ -43,6 +44,11 @@ class MemcachedCache implements CacheInterface
      * @return \Memcached
      *
      * @throws MemcachedCacheException
+     * @throws \ReflectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ContainerTypeNotSupportingException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ReturnTypeMustImplementsInterfaceException
      */
     public function getCacheConnect() : \Memcached
     {
@@ -53,14 +59,14 @@ class MemcachedCache implements CacheInterface
         $hostOrSocket = getenv(self::CACHE_HOST_OR_SOCKET_ENV);
         $port = (int)getenv(self::CACHE_PORT_ENV);
         if (!$hostOrSocket || !$hostOrSocket) {
-            throw new MemcachedCacheException('Недостаточно данных для подключения к Memcached.');
+            throw new MemcachedCacheException(translate('cache.memcached-not-enough-data'));
         }
 
         if ($this->memcached->addServer($hostOrSocket, $port)) {
             return $this->memcached;
         }
 
-        throw new MemcachedCacheException('Не удалось подключиться к Memcached.');
+        throw new MemcachedCacheException(translate('cache.memcached-connect-failed'));
     }
 
     /**
@@ -87,6 +93,11 @@ class MemcachedCache implements CacheInterface
      * @return CacheStructure
      *
      * @throws MemcachedCacheException
+     * @throws \ReflectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ContainerTypeNotSupportingException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ReturnTypeMustImplementsInterfaceException
      */
     public function get(string $key) : CacheStructure
     {
@@ -98,6 +109,11 @@ class MemcachedCache implements CacheInterface
      *
      * @throws MemcachedCacheException
      * @throws MemcachedOperationException
+     * @throws \ReflectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ContainerTypeNotSupportingException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ReturnTypeMustImplementsInterfaceException
      */
     public function initTags(array $tags) : void
     {
@@ -112,7 +128,7 @@ class MemcachedCache implements CacheInterface
             }
 
             if (!$this->getCacheConnect()->set($this->getKey($tagStructure->getName()), (string)$tagStructure)) {
-                throw new MemcachedOperationException('Операция инициализации тегов не удалась.');
+                throw new MemcachedOperationException(translate('cache.tags-init-failed'));
             }
         }
     }
@@ -123,6 +139,11 @@ class MemcachedCache implements CacheInterface
      * @return TagStructure[]
      *
      * @throws MemcachedCacheException
+     * @throws \ReflectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ContainerTypeNotSupportingException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ReturnTypeMustImplementsInterfaceException
      */
     public function getTagsData(array $tags) : array
     {
@@ -143,10 +164,15 @@ class MemcachedCache implements CacheInterface
     /**
      * @param string $key
      * @param CacheStructure $value
-     * @param int $ttl
+     * @param int|null $ttl
      *
      * @throws MemcachedCacheException
      * @throws MemcachedOperationException
+     * @throws \ReflectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ContainerTypeNotSupportingException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ReturnTypeMustImplementsInterfaceException
      */
     public function set(string $key, CacheStructure $value, int $ttl = null) : void
     {
@@ -158,7 +184,7 @@ class MemcachedCache implements CacheInterface
 
         $ttl = $ttl ?? ((int)getenv(self::CACHE_TIMEOUT_ENV) ?: 0);
         if (!$this->getCacheConnect()->set($this->getKey($key), $strValue, $ttl)) {
-            throw new MemcachedOperationException('Операция записи по ключу не удалась.');
+            throw new MemcachedOperationException(translate('cache.write-by-key-failed'));
         }
     }
 
@@ -166,6 +192,11 @@ class MemcachedCache implements CacheInterface
      * @param string $key
      *
      * @throws MemcachedCacheException
+     * @throws \ReflectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ContainerTypeNotSupportingException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ReturnTypeMustImplementsInterfaceException
      */
     public function delete(string $key) : void
     {

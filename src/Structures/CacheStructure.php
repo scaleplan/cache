@@ -6,6 +6,7 @@ namespace Scaleplan\Cache\Structures;
 use Scaleplan\Cache\Exceptions\CacheException;
 use Scaleplan\InitTrait\InitTrait;
 use Scaleplan\Result\Interfaces\ArrayResultInterface;
+use function Scaleplan\Translator\translate;
 
 /**
  * Class CacheStructure
@@ -156,6 +157,11 @@ class CacheStructure
      * @return string
      *
      * @throws CacheException
+     * @throws \ReflectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ContainerTypeNotSupportingException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ReturnTypeMustImplementsInterfaceException
      */
     public function __toString()
     {
@@ -177,7 +183,7 @@ class CacheStructure
             'id_tag' => $this->getIdTag(),
         ], JSON_UNESCAPED_UNICODE);
         if ($json === false) {
-            throw new CacheException('Не удалось сериализовать данные для кэширования.');
+            throw new CacheException(translate('cache.serialize-failed'));
         }
 
         return (string)$json;

@@ -9,6 +9,6 @@ namespace Scaleplan\Cache\Exceptions;
  */
 class MemcachedOperationException extends MemcachedCacheException
 {
-    public const MESSAGE = 'Операция с Memcached не удалась.';
+    public const MESSAGE = 'cache.memcached-failed';
     public const CODE = 500;
 }

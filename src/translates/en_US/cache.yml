@@ -1,0 +1,14 @@
+memcached-not-enough-data: Not enough data to connect to Memcached.
+memcached-connect-failed: Memcached connect failed.
+tags-init-failed: Tags initialization failed.
+write-by-key-failed: Write by key failed.
+redis-not-enough-data: Not enough data to connect toRedis.
+connect-to-host-failed: Connect to host/socket failed.
+delete-by-key-failed: Remove by key failed.
+serialize-failed: Data serialization for caching failed.
+driver-not-supported: This cache driver not supported.
+cache-error: Cache error.
+memcached-error: Memcached error.
+memcached-failed: Memcached operation failed.
+redis-error: Redis error.
+redis-failed: Redis operation error.

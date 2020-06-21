@@ -7,6 +7,7 @@ use Scaleplan\Cache\Exceptions\RedisCacheException;
 use Scaleplan\Cache\Exceptions\RedisOperationException;
 use Scaleplan\Cache\Structures\CacheStructure;
 use Scaleplan\Cache\Structures\TagStructure;
+use function Scaleplan\Translator\translate;
 
 /**
  * Class RedisCache
@@ -48,6 +49,11 @@ class RedisCache implements CacheInterface
      * @return \Redis
      *
      * @throws RedisCacheException
+     * @throws \ReflectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ContainerTypeNotSupportingException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ReturnTypeMustImplementsInterfaceException
      */
     public function getCacheConnect() : \Redis
     {
@@ -59,7 +65,7 @@ class RedisCache implements CacheInterface
         $port = (int)getenv(self::CACHE_PORT_ENV);
         $timeout = (int)getenv(self::CACHE_TIMEOUT_ENV) ?: 0;
         if (!$hostOrSocket || !$hostOrSocket) {
-            throw new RedisCacheException('Недостаточно данных для подключения к Redis.');
+            throw new RedisCacheException(translate('cache.redis-not-enough-data'));
         }
 
         if ($this->isPconnect) {
@@ -72,7 +78,7 @@ class RedisCache implements CacheInterface
             return $this->redis;
         }
 
-        throw new RedisCacheException ("Не удалось подключиться к хосту/сокету $hostOrSocket.");
+        throw new RedisCacheException(translate('cache.connect-to-host-failed', ['host-or-socket' => $hostOrSocket]));
     }
 
     /**
@@ -99,6 +105,11 @@ class RedisCache implements CacheInterface
      * @return CacheStructure
      *
      * @throws RedisCacheException
+     * @throws \ReflectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ContainerTypeNotSupportingException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ReturnTypeMustImplementsInterfaceException
      */
     public function get(string $key) : CacheStructure
     {
@@ -109,6 +120,12 @@ class RedisCache implements CacheInterface
      * @param TagStructure[] $tags
      *
      * @throws RedisCacheException
+     * @throws RedisOperationException
+     * @throws \ReflectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ContainerTypeNotSupportingException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ReturnTypeMustImplementsInterfaceException
      */
     public function initTags(array $tags) : void
     {
@@ -127,7 +144,7 @@ class RedisCache implements CacheInterface
         }
 
         if (!$this->getCacheConnect()->mset($tagsToSave)) {
-            throw new RedisOperationException('Операция инициализации тегов не удалась.');
+            throw new RedisOperationException(translate('cache.tags-init-failed'));
         }
     }
 
@@ -137,6 +154,11 @@ class RedisCache implements CacheInterface
      * @return TagStructure[]
      *
      * @throws RedisCacheException
+     * @throws \ReflectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ContainerTypeNotSupportingException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ReturnTypeMustImplementsInterfaceException
      */
     public function getTagsData(array $tags) : array
     {
@@ -160,9 +182,15 @@ class RedisCache implements CacheInterface
     /**
      * @param string $key
      * @param CacheStructure $value
-     * @param int $ttl
+     * @param int|null $ttl
      *
      * @throws RedisCacheException
+     * @throws RedisOperationException
+     * @throws \ReflectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ContainerTypeNotSupportingException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ReturnTypeMustImplementsInterfaceException
      */
     public function set(string $key, CacheStructure $value, int $ttl = null) : void
     {
@@ -174,7 +202,7 @@ class RedisCache implements CacheInterface
 
         $ttl = $ttl ?? (int)$this->redis->getTimeout();
         if (!$this->getCacheConnect()->set($this->getKey($key), $strValue, $ttl)) {
-            throw new RedisOperationException('Операция записи по ключу не удалась.');
+            throw new RedisOperationException(translate('cache.write-by-key-failed'));
         }
     }
 
@@ -183,11 +211,16 @@ class RedisCache implements CacheInterface
      *
      * @throws RedisCacheException
      * @throws RedisOperationException
+     * @throws \ReflectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ContainerTypeNotSupportingException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ReturnTypeMustImplementsInterfaceException
      */
     public function delete(string $key) : void
     {
         if (!$this->getCacheConnect()->del($this->getKey($key))) {
-            throw new RedisOperationException('Операция удаления по ключу не удалась.');
+            throw new RedisOperationException(translate('cache.delete-by-key-failed'));
         }
     }
 }

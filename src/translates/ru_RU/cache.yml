@@ -1,0 +1,14 @@
+memcached-not-enough-data: Недостаточно данных для подключения к Memcached.
+memcached-connect-failed: Не удалось подключиться к Memcached.
+tags-init-failed: Операция инициализации тегов не удалась.
+write-by-key-failed: Операция записи по ключу не удалась.
+redis-not-enough-data: Недостаточно данных для подключения к Redis.
+connect-to-host-failed: Не удалось подключиться к хосту/сокету :host-or-socket.
+delete-by-key-failed: Операция удаления по ключу не удалась.
+serialize-failed: Не удалось сериализовать данные для кэширования.
+driver-not-supported: Такой драйвер кэша не поддерживается.
+cache-error: Ошибка кэша.
+memcached-error: Ошибка Memcached.
+memcached-failed: Операция с Memcached не удалась.
+redis-error: Ошибка Redis.
+redis-failed: Операция с Redis не удалась.
