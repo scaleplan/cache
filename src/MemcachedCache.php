@@ -14,7 +14,7 @@ use function Scaleplan\Translator\translate;
  *
  * @package Scaleplan\Cache\Cache
  */
-class MemcachedCache implements CacheInterface
+class MemcachedCache implements CacheInterface, \Psr\SimpleCache\CacheInterface
 {
     public const PERSISTENT_ID = 589475;
 
@@ -90,6 +90,8 @@ class MemcachedCache implements CacheInterface
     /**
      * @param string $key
      *
+     * @param null $default
+     *
      * @return CacheStructure
      *
      * @throws MemcachedCacheException
@@ -99,7 +101,7 @@ class MemcachedCache implements CacheInterface
      * @throws \Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException
      * @throws \Scaleplan\DependencyInjection\Exceptions\ReturnTypeMustImplementsInterfaceException
      */
-    public function get(string $key) : CacheStructure
+    public function get($key, $default = null) : CacheStructure
     {
         return new CacheStructure((array)json_decode($this->getCacheConnect()->get($this->getKey($key)) ?: '', true));
     }
@@ -174,7 +176,7 @@ class MemcachedCache implements CacheInterface
      * @throws \Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException
      * @throws \Scaleplan\DependencyInjection\Exceptions\ReturnTypeMustImplementsInterfaceException
      */
-    public function set(string $key, CacheStructure $value, int $ttl = null) : void
+    public function set($key, $value, $ttl = null) : void
     {
         if ($value instanceof \Serializable) {
             $strValue = $value->serialize();
@@ -198,8 +200,91 @@ class MemcachedCache implements CacheInterface
      * @throws \Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException
      * @throws \Scaleplan\DependencyInjection\Exceptions\ReturnTypeMustImplementsInterfaceException
      */
-    public function delete(string $key) : void
+    public function delete($key) : void
     {
         $this->getCacheConnect()->delete($this->getKey($key));
+    }
+
+    /**
+     * @throws MemcachedCacheException
+     * @throws \ReflectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ContainerTypeNotSupportingException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ReturnTypeMustImplementsInterfaceException
+     */
+    public function clear() : void
+    {
+        $this->getCacheConnect()->flush();
+    }
+
+    /**
+     * @param iterable $keys
+     * @param null $default
+     *
+     * @return array
+     *
+     * @throws MemcachedCacheException
+     * @throws \ReflectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ContainerTypeNotSupportingException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ReturnTypeMustImplementsInterfaceException
+     */
+    public function getMultiple($keys, $default = null) : array
+    {
+        return array_map(static function ($value) use ($default) {
+            return $value === false ? $default : $value;
+        }, $this->getCacheConnect()->getMulti(is_array($keys) ? $keys : iterator_to_array($keys)));
+    }
+
+    /**
+     * @param iterable $values
+     * @param null $ttl
+     *
+     * @throws MemcachedCacheException
+     * @throws \ReflectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ContainerTypeNotSupportingException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ReturnTypeMustImplementsInterfaceException
+     */
+    public function setMultiple($values, $ttl = null) : void
+    {
+        $this->getCacheConnect()->setMulti(is_array($values) ? $values : iterator_to_array($values), $ttl);
+    }
+
+    /**
+     * @param iterable $keys
+     *
+     * @throws MemcachedCacheException
+     * @throws \ReflectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ContainerTypeNotSupportingException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ReturnTypeMustImplementsInterfaceException
+     */
+    public function deleteMultiple($keys) : void
+    {
+        $this->getCacheConnect()->deleteMulti(is_array($keys) ? $keys : iterator_to_array($keys));
+    }
+
+    /**
+     * @param string $key
+     *
+     * @return bool
+     *
+     * @throws MemcachedCacheException
+     * @throws \ReflectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ContainerTypeNotSupportingException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ReturnTypeMustImplementsInterfaceException
+     */
+    public function has($key) : bool
+    {
+        $this->getCacheConnect()->get($key);
+
+        return \Memcached::RES_NOTFOUND !== $this->getCacheConnect()->getResultCode();
     }
 }

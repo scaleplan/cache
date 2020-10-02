@@ -43,14 +43,14 @@ interface CacheInterface
      *
      * @return CacheStructure
      */
-    public function get(string $key) : CacheStructure;
+    public function get(string $key);
 
     /**
      * @param string $key
      * @param CacheStructure $value
-     * @param int|null $ttl
+     * @param null|int|\DateInterval $ttl
      */
-    public function set(string $key, CacheStructure $value, int $ttl = null) : void;
+    public function set(string $key, CacheStructure $value, $ttl = null) : void;
 
     /**
      * @param string $key

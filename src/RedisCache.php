@@ -14,7 +14,7 @@ use function Scaleplan\Translator\translate;
  *
  * @package Scaleplan\Cache\Cache
  */
-class RedisCache implements CacheInterface
+class RedisCache implements CacheInterface, \Psr\SimpleCache\CacheInterface
 {
     public const RESERVED       = '';
     public const RETRY_INTERVAL = 0;
@@ -102,6 +102,8 @@ class RedisCache implements CacheInterface
     /**
      * @param string $key
      *
+     * @param null $default
+     *
      * @return CacheStructure
      *
      * @throws RedisCacheException
@@ -111,9 +113,11 @@ class RedisCache implements CacheInterface
      * @throws \Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException
      * @throws \Scaleplan\DependencyInjection\Exceptions\ReturnTypeMustImplementsInterfaceException
      */
-    public function get(string $key) : CacheStructure
+    public function get($key, $default = '') : CacheStructure
     {
-        return new CacheStructure((array)json_decode($this->getCacheConnect()->get($this->getKey($key)) ?: '', true));
+        return new CacheStructure(
+            (array)json_decode($this->getCacheConnect()->get($this->getKey($key)) ?: $default, true)
+        );
     }
 
     /**
@@ -182,7 +186,7 @@ class RedisCache implements CacheInterface
     /**
      * @param string $key
      * @param CacheStructure $value
-     * @param int|null $ttl
+     * @param null|int|\DateInterval $ttl
      *
      * @throws RedisCacheException
      * @throws RedisOperationException
@@ -192,7 +196,7 @@ class RedisCache implements CacheInterface
      * @throws \Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException
      * @throws \Scaleplan\DependencyInjection\Exceptions\ReturnTypeMustImplementsInterfaceException
      */
-    public function set(string $key, CacheStructure $value, int $ttl = null) : void
+    public function set($key, $value, $ttl = null) : void
     {
         if ($value instanceof \Serializable) {
             $strValue = $value->serialize();
@@ -217,10 +221,69 @@ class RedisCache implements CacheInterface
      * @throws \Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException
      * @throws \Scaleplan\DependencyInjection\Exceptions\ReturnTypeMustImplementsInterfaceException
      */
-    public function delete(string $key) : void
+    public function delete($key) : void
     {
         if (!$this->getCacheConnect()->del($this->getKey($key))) {
             throw new RedisOperationException(translate('cache.delete-by-key-failed'));
         }
+    }
+
+    /**
+     * @throws RedisCacheException
+     * @throws \ReflectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ContainerTypeNotSupportingException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ReturnTypeMustImplementsInterfaceException
+     */
+    public function clear() : void
+    {
+        $this->getCacheConnect()->flushDB();
+    }
+
+    /**
+     * @param iterable $keys
+     * @param null $default
+     *
+     * @return array|iterable
+     *
+     * @throws RedisCacheException
+     * @throws \ReflectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ContainerTypeNotSupportingException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ReturnTypeMustImplementsInterfaceException
+     */
+    public function getMultiple($keys, $default = null) : array
+    {
+        return array_map(static function ($value) use ($default) {
+            return $value === false ? $default : $value;
+        }, $this->getCacheConnect()->mget(is_array($keys) ? $keys : iterator_to_array($keys)));
+    }
+
+    public function setMultiple($values, $ttl = null) : void
+    {
+        $this->getCacheConnect()->mset(is_array($values) ? $values : iterator_to_array($values));
+    }
+
+    public function deleteMultiple($keys) : void
+    {
+        $this->getCacheConnect()->del(is_array($keys) ? $keys : iterator_to_array($keys));
+    }
+
+    /**
+     * @param string $key
+     *
+     * @return bool|void
+     * @throws RedisCacheException
+     * @throws \ReflectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ContainerTypeNotSupportingException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\DependencyInjectionException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ParameterMustBeInterfaceNameOrClassNameException
+     * @throws \Scaleplan\DependencyInjection\Exceptions\ReturnTypeMustImplementsInterfaceException
+     */
+    public function has($key) : bool
+    {
+        $this->getCacheConnect()->exists($key);
     }
 }
