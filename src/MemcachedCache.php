@@ -7,6 +7,7 @@ use Scaleplan\Cache\Exceptions\MemcachedCacheException;
 use Scaleplan\Cache\Exceptions\MemcachedOperationException;
 use Scaleplan\Cache\Structures\CacheStructure;
 use Scaleplan\Cache\Structures\TagStructure;
+use Scaleplan\Helpers\Helper;
 use function Scaleplan\Translator\translate;
 
 /**
@@ -166,7 +167,7 @@ class MemcachedCache implements CacheInterface, \Psr\SimpleCache\CacheInterface
     /**
      * @param string $key
      * @param CacheStructure $value
-     * @param int|null $ttl
+     * @param null|int|\DateInterval $ttl
      *
      * @throws MemcachedCacheException
      * @throws MemcachedOperationException
@@ -182,6 +183,10 @@ class MemcachedCache implements CacheInterface, \Psr\SimpleCache\CacheInterface
             $strValue = $value->serialize();
         } else {
             $strValue = (string)$value;
+        }
+
+        if ($ttl instanceof \DateInterval) {
+            $ttl = Helper::dateIntervalToSeconds($ttl);
         }
 
         $ttl = $ttl ?? ((int)getenv(self::CACHE_TIMEOUT_ENV) ?: 0);

@@ -7,6 +7,7 @@ use Scaleplan\Cache\Exceptions\RedisCacheException;
 use Scaleplan\Cache\Exceptions\RedisOperationException;
 use Scaleplan\Cache\Structures\CacheStructure;
 use Scaleplan\Cache\Structures\TagStructure;
+use Scaleplan\Helpers\Helper;
 use function Scaleplan\Translator\translate;
 
 /**
@@ -101,8 +102,7 @@ class RedisCache implements CacheInterface, \Psr\SimpleCache\CacheInterface
 
     /**
      * @param string $key
-     *
-     * @param null $default
+     * @param mixed $default
      *
      * @return CacheStructure
      *
@@ -202,6 +202,10 @@ class RedisCache implements CacheInterface, \Psr\SimpleCache\CacheInterface
             $strValue = $value->serialize();
         } else {
             $strValue = (string)$value;
+        }
+
+        if ($ttl instanceof \DateInterval) {
+            $ttl = Helper::dateIntervalToSeconds($ttl);
         }
 
         $ttl = $ttl ?? (int)$this->redis->getTimeout();

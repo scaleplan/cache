@@ -50,7 +50,7 @@ interface CacheInterface
      * @param CacheStructure $value
      * @param null|int|\DateInterval $ttl
      */
-    public function set(string $key, CacheStructure $value, $ttl = null) : void;
+    public function set($key, $value, $ttl = null) : void;
 
     /**
      * @param string $key
